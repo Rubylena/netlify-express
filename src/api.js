@@ -1,13 +1,14 @@
-const express = require("express");
-const serverless = require("serverless-http");
+import express, { Router, json } from "express";
+import serverless from "serverless-http";
 
 const app = express();
-const router = express.Router();
+const router = Router();
 
-require("dotenv/config"); // configure reading from .env
-const cors = require("cors");
-const {OAuth2Client} = require("google-auth-library");
-const jwt = require("jsonwebtoken");
+import 'encoding';
+import "dotenv/config"; // configure reading from .env
+import cors from "cors";
+import { OAuth2Client } from "google-auth-library";
+import { sign } from "jsonwebtoken";
 
 const allowedOrigins = ["http://localhost:5173",
   "https://paddy-journal.netlify.app"];
@@ -20,7 +21,7 @@ router.use(
       optionsSuccessStatus: 204
     }),
 );
-router.use(express.json());
+router.use(json());
 
 router.get("/", (request, response) => {
   response.send("Hello Paddy Admin");
@@ -71,7 +72,7 @@ router.post("/signup", async (req, res) => {
           picture: profile?.picture,
           databaseResponse: DB,
           email: profile?.email,
-          token: jwt.sign({email: profile?.email}, "mySecret", {
+          token: sign({email: profile?.email}, "mySecret", {
             expiresIn: "1d",
           }),
         },
@@ -113,7 +114,7 @@ router.post("/login", async (req, res) => {
           databaseResponse: DB,
           picture: profile?.picture,
           email: profile?.email,
-          token: jwt.sign({email: profile?.email}, process.env.JWT_SECRET, {
+          token: sign({email: profile?.email}, process.env.JWT_SECRET, {
             expiresIn: "1d",
           }),
         },
@@ -127,4 +128,4 @@ router.post("/login", async (req, res) => {
 });
 
 app.use("/.netlify/functions/api", router);
-module.exports.handler = serverless(app);
+export const handler = serverless(app);
